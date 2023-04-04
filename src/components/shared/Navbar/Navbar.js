@@ -1,9 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from "../../../images/logo/sapopsa.png";
 import shoppingCard from "../../../images/icon/cart.png";
 import {FiShoppingCart} from "react-icons/fi";
+import { useNavigate } from 'react-router-dom';
+import { getProducts } from "../../../utilites/addToCard";
 
-const Navbar = () => {
+const Navbar = ({ refetch }) => {
+    const navigate = useNavigate();
+    // const [user] = useAuthState(auth);
+    const [addToCardProducts, setaddToCardProducts] = useState(0);
+    const [webHeading, setWebHeading] = useState({ heading: '', isDispaly: false });
+
+    // Get add to card products
+    useEffect(() => {
+        const products = getProducts();
+        setaddToCardProducts(products?.length);
+    }, [refetch]);
 
     const allMenu = () => {
 
