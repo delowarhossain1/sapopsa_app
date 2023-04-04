@@ -10,7 +10,7 @@ const App = () => {
 
 
   return (
-    <div className=''>
+    <div className=' bg-gray-100'>
       <div className=' w-[98%] mx-auto px-5'>
 
         {/* Navbar added */}
