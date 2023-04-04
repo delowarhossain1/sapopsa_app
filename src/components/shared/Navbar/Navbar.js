@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import logo from "../../../images/logo/sapopsa.png";
-import shoppingCard from "../../../images/icon/cart.png";
-import {FiShoppingCart} from "react-icons/fi";
-import { useNavigate } from 'react-router-dom';
+import { FiShoppingCart } from "react-icons/fi";
+import { Link, useNavigate } from 'react-router-dom';
 import { getProducts } from "../../../utilites/addToCard";
+import { useQuery } from 'react-query';
+import axios from 'axios';
+import Menu from './Menu';
 
 const Navbar = ({ refetch }) => {
     const navigate = useNavigate();
@@ -17,30 +19,34 @@ const Navbar = ({ refetch }) => {
         setaddToCardProducts(products?.length);
     }, [refetch]);
 
-    const allMenu = () => {
+    // Get web heading
+    const getWebHeading = useQuery('nav-web-heading', () => (
+        axios.get('/api/web-heading')
+            .then(res => setWebHeading(res?.data))
+    ));
 
-        return (
-            <ul className="menu menu-horizontal px-1">
-                <li tabIndex={0}>
-                    <a>
-                        Parent
-                        <svg className="fill-current" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" /></svg>
-                    </a>
-                    <ul className="p-2">
-                        <li><a>Submenu 1</a></li>
-                        <li><a>Submenu 2</a></li>
-                    </ul>
-                </li>
+    // Handle search
+    const handleSearch = (event) => {
+        event.preventDefault();
 
-            </ul>
-        )
+        const text = event.target.text.value;
+        if (text?.length > 3) {
+            navigate(`/search/${text}`);
+        }
     }
+
+    // Get cagories
+    const { data: categories } = useQuery('nav-categories-list', () => (
+        axios.get('/api/categories-list')
+            .then(res => res?.data)
+    ));
+
 
     return (
         <div>
             {/* Navbar heading */}
             <div className='p-2 bg-black text-white'>
-                <marquee>hello how are you?</marquee>
+                <marquee>{webHeading?.heading}</marquee>
             </div>
 
             {/* Menu */}
@@ -51,51 +57,53 @@ const Navbar = ({ refetch }) => {
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
                         </label>
                         <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
-                            <li><a>Item 1</a></li>
-                            <li tabIndex={0}>
-                                <a className="justify-between">
-                                    Parent
-                                    <svg className="fill-current" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
-                                </a>
-                                <ul className="p-2">
-                                    <li><a>Submenu 1</a></li>
-                                    <li><a>Submenu 2</a></li>
-                                </ul>
-                            </li>
-                            <li><a>Item 3</a></li>
+
+                            <Menu title='Men' items={categories?.men} />
+                            <Menu title='Women' items={categories?.women} />
+                            <Menu title='Sports' items={categories?.sports} />
+
                         </ul>
                     </div>
-                    <div>
+                    <Link to='/'>
                         <img src={logo} alt='logo' className='w-12' />
-                    </div>
+                    </Link>
                 </div>
                 <div className="navbar-center hidden lg:flex">
+
                     <ul className="menu menu-horizontal px-1">
-                        <li><a>MEN</a></li>
-                        <li tabIndex={0}>
-                            <a>
-                                Parent
-                                <svg className="fill-current" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" /></svg>
-                            </a>
-                            <ul className="p-2">
-                                <li><a>Submenu 1</a></li>
-                                <li><a>Submenu 2</a></li>
-                            </ul>
-                        </li>
-                        <li><a>SPORTS</a></li>
+                        <Menu title='Men' items={categories?.men} />
+                        <Menu title='Women' items={categories?.women} />
+                        <Menu title='Sports' items={categories?.sports} />
                     </ul>
+
+
                 </div>
                 <div className="navbar-end">
                     {/* Search bar */}
                     <div className='flex items-center space-x-3'>
-                    <input type="text" placeholder="Search..." className="input input-bordered input-sm w-full max-w-xs border-black" />
 
-                        <div className='flex cursor-pointer'>
-                            <FiShoppingCart className='text-3xl' />
-                            <span className=" bg-pink-900 p-1 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mt-[-10px]">2</span>
-                        </div>
+                        <form onSubmit={handleSearch}>
+                            <div className="form-control">
+                                <div className="input-group">
+                                    <input type="text" placeholder="Search…" className="input input-bordered input-sm" name='text' />
+                                    <button className="btn btn-square btn-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
 
-                        <span className='text-xl cursor-pointer'>Login</span>
+                        <Link to='/add-to-card'>
+                            <div className='flex cursor-pointer'>
+                                <FiShoppingCart className='text-3xl' />
+
+
+                                <span className=" bg-pink-900 p-1 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mt-[-10px]">{addToCardProducts}</span>
+
+                            </div>
+                        </Link>
+
+                        <Link to='/login' className='text-xl cursor-pointer'>Login</Link>
                     </div>
                 </div>
             </div>
